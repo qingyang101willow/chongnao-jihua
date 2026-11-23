@@ -20,6 +20,10 @@ repositories {
         name = 'Fabric'
         url = 'https://maven.fabricmc.net/'
     }
+    maven {
+        name = 'MavenCentral'
+        url = 'https://repo1.maven.org/maven2/'
+    }
 }
 
 dependencies {
