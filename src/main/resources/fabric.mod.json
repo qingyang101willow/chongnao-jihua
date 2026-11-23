@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "虫巢计划",
+  "version": "${version}",
+  "name": "虫巢计划",
+  "description": "A Fabric mod implementing a hive mind AI system for Minecraft - 虫巢计划模组",
+  "authors": [
+    "虫巢计划团队"
+  ],
+  "contact": {
+    "homepage": "https://github.com/fabricmc/fabric-example-mod",
+    "sources": "https://github.com/fabricmc/fabric-example-mod"
+  },
+  "license": "MIT",
+  "icon": "assets/虫巢计划/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.虫巢计划.ChongNaoJiHuaMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
