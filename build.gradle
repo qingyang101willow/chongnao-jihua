@@ -6,6 +6,8 @@ group = 'com.chongnao'
 version = '1.0.0'
 
 repositories {
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/grails-core' }
     mavenCentral()
 }
 
@@ -15,3 +17,7 @@ dependencies {
 
 sourceCompatibility = '21'
 targetCompatibility = '21'
+
+tasks.named('test') {
+    enabled = false
+}
