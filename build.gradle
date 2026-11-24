@@ -2,11 +2,15 @@ plugins {
     id 'java'
 }
 
-group = 'com.example'
+group = 'com.chongnaojihua'
 version = '1.0.0'
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    // 暂时不依赖外部库
 }
 
 sourceCompatibility = '21'
