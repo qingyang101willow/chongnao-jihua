@@ -20,14 +20,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-      
       - name: Build with Gradle
-        run: gradle build --no-daemon --stacktrace
+        run: ./gradlew compileJava --no-daemon
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: chongnao-mod
-          path: build/libs/*.jar
+          path: build/classes/java/main/**/*.class
