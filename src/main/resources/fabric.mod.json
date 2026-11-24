@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "chongnaojihua",
+  "version": "${version}",
+  "name": "虫巢计划",
+  "description": "A Fabric mod implementing a hive mind AI system for Minecraft",
+  "authors": [
+    "虫巢计划团队"
+  ],
+  "contact": {
+    "homepage": "https://github.com/qingyang101willow/chongnao-jihua",
+    "sources": "https://github.com/qingyang101willow/chongnao-jihua"
+  },
+  "license": "MIT",
+  "icon": "assets/chongnaojihua/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.chongnaojihua.ChongNaoJiHuaMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
