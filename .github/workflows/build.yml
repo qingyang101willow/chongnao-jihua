@@ -24,12 +24,9 @@ jobs:
         run: |
           wget https://services.gradle.org/distributions/gradle-8.7-bin.zip
           unzip -q gradle-8.7-bin.zip
-          export PATH="$PWD/gradle-8.7/bin:$PATH"
       
       - name: Build with Gradle
-        run: |
-          export PATH="$PWD/gradle-8.7/bin:$PATH"
-          gradle build --no-daemon --stacktrace
+        run: ./gradle-8.7/bin/gradle build --no-daemon --stacktrace
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
