@@ -20,11 +20,19 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
+      - name: Download Gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip
+          export PATH="$PWD/gradle-8.7/bin:$PATH"
+      
       - name: Build with Gradle
-        run: ./gradlew compileJava --no-daemon
+        run: |
+          export PATH="$PWD/gradle-8.7/bin:$PATH"
+          gradle build --no-daemon --stacktrace
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: chongnao-mod
-          path: build/classes/java/main/**/*.class
+          path: build/libs/*.jar
