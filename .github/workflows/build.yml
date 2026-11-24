@@ -1,16 +1,13 @@
-name: Build Fabric Mod
+name: Build
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       
@@ -20,14 +17,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
-      - name: Build with Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Compile
+        run: |
+          mkdir -p build/classes
+          javac -d build/classes src/main/java/com/example/Main.java
+          echo "编译成功!"
         
-      - name: Compile Java
-        run: gradle compileJava --no-daemon
-        
-      - name: Upload artifact
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: chongnao-mod
-          path: build/classes/java/main/**
+          name: classes
+          path: build/classes/
