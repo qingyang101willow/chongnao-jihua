@@ -20,16 +20,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
-      - name: Download Gradle
+      - name: Compile Java
         run: |
-          curl -L https://services.gradle.org/distributions/gradle-8.7-bin.zip -o gradle.zip
-          unzip -q gradle.zip
-      
-      - name: Build with Gradle
-        run: ./gradle-8.7/bin/gradle build --no-daemon --stacktrace
+          mkdir -p build/classes
+          javac -d build/classes -source 21 -target 21 src/main/java/com/虫巢计划/*.java
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: chongnao-mod
-          path: build/libs/*.jar
+          path: build/classes/
