@@ -20,16 +20,21 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
-      - name: Build with Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Cache Gradle
+        uses: actions/cache@v3
         with:
-          build-root-directory: .
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       
-      - name: Compile Java
-        run: gradle compileJava --no-daemon
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon --stacktrace
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: chongnao-mod
-          path: build/classes/java/main/**
+          path: build/libs/*.jar
