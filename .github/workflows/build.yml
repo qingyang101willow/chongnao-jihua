@@ -20,13 +20,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       
-      - name: Compile Java
-        run: |
-          mkdir -p build/classes
-          javac -d build/classes -source 21 -target 21 src/main/java/com/虫巢计划/*.java
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon --stacktrace
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: chongnao-mod
-          path: build/classes/
+          path: build/libs/*.jar
