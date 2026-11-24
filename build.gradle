@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+tasks.named('test') {
+    enabled = false
+}
