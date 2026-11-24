@@ -1,0 +1,25 @@
+name: Automatic Contrib PRs
+
+on:
+  schedule:
+    # 每天 UTC 0:00 运行
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-contrib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create contributions
+        uses: github/automatic-contrib-prs@v2.1.8
+        with:
+          branch-name: auto-contrib
+          commit-message: "chore: auto-generated contribution"
+          pr-title: "chore: auto-generated contribution"
+          pr-body: "This is an automated contribution PR."
