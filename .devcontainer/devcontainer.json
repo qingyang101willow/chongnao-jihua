@@ -1,0 +1,20 @@
+{
+  "name": "虫巢计划3 Fabric Mod",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "gradle": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.vscode-xml",
+        "vscjava.vscode-java-pack"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x ./gradlew && ./gradlew build",
+  "remoteUser": "vscode"
+}
