@@ -1,0 +1,28 @@
+{
+  "format_version": "1.16.0",
+  "client_data": {
+    "mininum_render_distance": 2
+  },
+  "materials": {
+    "mother_bug": {
+      "texture": "texture_default"
+    }
+  },
+  "textures": {
+    "texture_default": "entity/mother_bug"
+  },
+  "geometries": [
+    {
+      "default": "geometry.mother_bug"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "loop": true
+    }
+  },
+  "scripts": {
+    "scale": "0.9375",
+    "animate": ["idle"]
+  }
+}
