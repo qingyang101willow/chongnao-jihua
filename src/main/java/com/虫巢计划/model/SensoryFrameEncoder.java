@@ -16,7 +16,7 @@ public class SensoryFrameEncoder {
         SensoryFrame frame = new SensoryFrame();
         frame.frameTick = (int) world.getTime();
         frame.worldSeed = world.getSeed();
-        frame.dimensionId = world.getDimension().equals(net.minecraft.world.dimension overloads) ? 0 : 0;
+        frame.dimensionId = world.getDimension().getY();
         frame.isDark = !world.isDay();
         frame.daylight = world.getTimeOfDay();
         
