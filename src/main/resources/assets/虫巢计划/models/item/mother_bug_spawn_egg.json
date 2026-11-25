@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "虫巢计划:item/mother_bug_spawn_egg"
+  }
+}
