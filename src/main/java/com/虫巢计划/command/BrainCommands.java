@@ -6,8 +6,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 调试命令: /brain status — 显示脑线程状态
@@ -15,17 +13,15 @@ import org.slf4j.LoggerFactory;
 public class BrainCommands implements CommandRegistrationCallback {
 
     public static final BrainCommands INSTANCE = new BrainCommands();
-    public static final Logger LOGGER = LoggerFactory.getLogger(BrainCommands.class);
 
     @Override
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("brain")
                 .then(CommandManager.literal("status")
                         .executes(BrainCommands::status))
-                .then(CommandManager.literal("feed")
-                        .executes(BrainCommands::feed))
+                .then(CommandManager.literal("reset")
+                        .executes(BrainCommands::reset))
         );
-        LOGGER.info("注册调试命令: /brain status, /brain feed");
     }
 
     private static int status(CommandContext<ServerCommandSource> ctx) {
@@ -34,31 +30,39 @@ public class BrainCommands implements CommandRegistrationCallback {
             ctx.getSource().sendFeedback(() -> Text.literal("脑线程未初始化"), false);
             return 0;
         }
+        
         var snap = brain.readSnapshot();
-        ctx.getSource().sendFeedback(() -> Text.literal(
-                String.format("脑线程: running=%s, tick=%d, action=%s, conf=%.2f",
-                        brain.isRunning(),
-                        snap.producingTick,
-                        snap.action,
-                        snap.confidence)
-        ), false);
+        var buf = brain.frameBuffer;
+        
+        String msg = String.format(
+                "脑线程状态:\n" +
+                "  运行: %s\n" +
+                "  Tick: %d\n" +
+                "  Action: %s\n" +
+                "  Confidence: %.2f\n" +
+                "  缓冲大小: %d/%d\n" +
+                "  丢帧率: %.1f%%",
+                brain.isRunning(),
+                snap.producingTick,
+                snap.action,
+                snap.confidence,
+                buf.size(),
+                64,
+                buf.getDropRate() * 100
+        );
+        
+        ctx.getSource().sendFeedback(() -> Text.literal(msg), false);
         return 1;
     }
 
-    private static int feed(CommandContext<ServerCommandSource> ctx) {
-        var world = ctx.getSource().getWorld();
-        if (world == null || world.isClient) {
-            ctx.getSource().sendFeedback(() -> Text.literal("只在服务器端执行"), false);
-            return 0;
-        }
+    private static int reset(CommandContext<ServerCommandSource> ctx) {
         var brain = com.虫巢计划.ChongNaoJiHuaMod.getBrain();
         if (brain == null) {
             ctx.getSource().sendFeedback(() -> Text.literal("脑线程未初始化"), false);
             return 0;
         }
-        com.虫巢计划.WorldSensor.collect(world, ctx.getSource().getPlayer(), null);
-        brain.feed(com.虫巢计划.WorldSensor.peek());
-        ctx.getSource().sendFeedback(() -> Text.literal("手动feed触发"), false);
+        brain.frameBuffer.resetStats();
+        ctx.getSource().sendFeedback(() -> Text.literal("统计已重置"), false);
         return 1;
     }
 }
