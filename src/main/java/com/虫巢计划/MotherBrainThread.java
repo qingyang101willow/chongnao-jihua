@@ -1,7 +1,8 @@
 package com.虫巢计划;
 
-import com.虫巢计划.model.SensoryFrame;
 import com.虫巢计划.model.BrainSnapshot;
+import com.虫巢计划.model.Intent;
+import com.虫巢计划.model.SensoryFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +12,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Фоновый поток, где «живёт» мозг.
- * - читает SensoryFrame каждые 50ms,
- * - пишет BrainSnapshot в double-buffer (volatile head/tail).
- * Поток стартует синхронно при andнициализации мода и завершается при онлайдтейле.
+ * 脑线程 - 神经推理核心
+ * 
+ * 线程安全约束（严格执行）：
+ * 1. 禁止直接访问任何 Minecraft World/Entity 对象
+ * 2. 所有推理必须基于 SensoryFrame 快照数据
+ * 3. 输出 Intent 不得持有 Entity 引用，使用 UUID
+ * 
+ * Brain Thread Safety Rules:
+ * MotherBrainThread 不允许直接访问任何 Minecraft World/Entity 对象。
+ * 所有神经推理必须基于 SensoryFrame 快照数据。
  */
 public class MotherBrainThread extends Thread {
 
@@ -25,25 +32,23 @@ public class MotherBrainThread extends Thread {
     private final AtomicInteger tickCounter = new AtomicInteger(0);
 
     // double buffer
-    private final BrainSnapshot snapshotA = new BrainSnapshot();
-    private final BrainSnapshot snapshotB = new BrainSnapshot();
-    // volatile: мир всегда читает актуальный head, brain пишет в tail
+    private final BrainSnapshot snapshotA = BrainSnapshot.idle(0);
+    private final BrainSnapshot snapshotB = BrainSnapshot.idle(0);
+    // volatile: 世界始终读取最新的 head
     private volatile BrainSnapshot head = snapshotA;
     private volatile BrainSnapshot tail = snapshotB;
 
     private final ReentrantLock modelLock = new ReentrantLock();
-    // placeholder for injected model/provider — пока заглушка
     private Object brainModel;
     
     // 无锁环形缓冲区
     public final SensoryFrameRingBuffer frameBuffer = new SensoryFrameRingBuffer(64);
     
-    // ScheduledExecutorService 替代 Thread.sleep
+    // ScheduledExecutorService
     private ScheduledExecutorService scheduler;
 
     public void startBrain() {
         if (running.compareAndSet(false, true)) {
-            // 使用 ScheduledExecutorService 替代 Thread.sleep
             scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "MotherBrain");
                 t.setDaemon(true);
@@ -70,25 +75,44 @@ public class MotherBrainThread extends Thread {
         LOGGER.info("MotherBrainThread остановлен");
     }
 
-    /** Главный поток вызывает каждый тик - 投递到环形缓冲区 */
+    /**
+     * 主线程调用 - 投递感官帧
+     * 注意：传入的 frame 应在主线程采集完毕，此处不再访问世界
+     */
     public void feed(SensoryFrame frame) {
         if (!running.get()) return;
         tickCounter.incrementAndGet();
         frameBuffer.offer(frame);
     }
 
-    /** Мир читает head, не блокируя запись в tail. */
+    /**
+     * 主线程调用 - 读取最新快照
+     */
     public BrainSnapshot readSnapshot() {
         return head;
     }
 
-    /** Подмена модели — можно ставить после старта. */
-    public void setModel(Object model) {
-        modelLock.lock();
-        try {
-            this.brainModel = model;
-        } finally {
-            modelLock.unlock();
+    /**
+     * 获取当前推理出的最高优先级意图
+     */
+    public Intent getCurrentIntent() {
+        BrainSnapshot snap = head;
+        if (!snap.valid) {
+            return new IdleIntent(System.currentTimeMillis());
+        }
+        // 简化映射：根据 action 返回对应 Intent
+        switch (snap.action) {
+            case MOVE_FORWARD:
+            case MOVE_BACKWARD:
+            case STRAFE_LEFT:
+            case STRAFE_RIGHT:
+                return new ExploreIntent(null, 0, System.currentTimeMillis());
+            case ATTACK:
+                return new AttackIntent(null, 5f, System.currentTimeMillis());
+            case JUMP:
+                return new IdleIntent(System.currentTimeMillis());
+            default:
+                return new IdleIntent(System.currentTimeMillis());
         }
     }
 
@@ -98,28 +122,27 @@ public class MotherBrainThread extends Thread {
 
     /**
      * 脑线程主循环 - 由 ScheduledExecutorService 调度
+     * 注意：此方法运行在独立线程，禁止访问任何 Minecraft 世界对象
      */
     private void brainCycle() {
         if (!running.get()) return;
         try {
-            // 从环形缓冲区取出最新帧
             SensoryFrame frame = frameBuffer.poll();
             if (frame == null) {
-                return; // 无新帧，跳过
+                return;
             }
             
             // TODO: 接入真实神经网络推理
-            // 当前使用占位逻辑：输出IDLE指令
+            // 当前使用占位逻辑：输出 IDLE 指令
+            // 严禁在此处访问 World/Entity/Chunk 等对象
             
-            BrainSnapshot next = tail.copy();
-            next.producingTick = tickCounter.get();
-            next.valid = true;
-            next.action = BrainSnapshot.MotorAction.IDLE;
-            next.confidence = 0.5f;
-            next.moveForward = 0.0f;
-            next.strafe = 0.0f;
-            next.jump = false;
-            next.attack = false;
+            BrainSnapshot next = BrainSnapshot.of(
+                    tickCounter.get(),
+                    0.0f, 0.0f, false, false,
+                    BrainSnapshot.MotorAction.IDLE,
+                    0.5f,
+                    "placeholder"
+            );
             
             // 原子切换双缓冲
             BrainSnapshot swap = this.head;
