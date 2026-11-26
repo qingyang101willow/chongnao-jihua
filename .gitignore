@@ -1,18 +1,20 @@
 # Gradle
-.gradle/
+.gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 
 # IDE
 .idea/
-*.iml
-*.iws
-*.ipr
 .vscode/
-.settings/
-.project
-.classpath
+*.iml
+*.ipr
+*.iws
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Mod output
+*.class
+*.jar
+!build/libs/*.jar
